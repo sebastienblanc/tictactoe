@@ -1,0 +1,138 @@
+{
+    "durationBetweenQuestions": "PT20S",
+    "name": "Java Wants To Be Milionaire",
+    "questions": [
+      {
+        "correctAnswer": {
+          "description": "Duke",
+          "prefix": "B"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "Kuke",
+            "prefix": "C"
+          },
+          {
+            "description": "Tuki",
+            "prefix": "A"
+          },
+          {
+            "description": "Puki",
+            "prefix": "D"
+          }
+        ],
+        "order": 0,
+        "title": "What's the name of Java mascot?"
+      },
+      {
+        "correctAnswer": {
+          "description": "class",
+          "prefix": "A"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "struct",
+            "prefix": "C"
+          },
+          {
+            "description": "klazz",
+            "prefix": "B"
+          },
+          {
+            "description": "There is no Class in Java",
+            "prefix": "D"
+          }
+        ],
+        "order": 1,
+        "title": "How do you define a class in Java"
+      },
+      {
+        "correctAnswer": {
+          "description": "a standalone pod",
+          "prefix": "A"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "A Pod with a ReplicaSet associated",
+            "prefix": "C"
+          },
+          {
+            "description": "A Pod with no clothes",
+            "prefix": "B"
+          },
+          {
+            "description": "A Pod that cannot be scaled",
+            "prefix": "D"
+          }
+        ],
+        "order": 2,
+        "title": "A naked Pod is : "
+      },
+      {
+        "correctAnswer": {
+          "description": "2014",
+          "prefix": "B"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "2008",
+            "prefix": "C"
+          },
+          {
+            "description": "1337",
+            "prefix": "A"
+          },
+          {
+            "description": "2016",
+            "prefix": "D"
+          }
+        ],
+        "order": 3,
+        "title": "First release of Kubernetes was in :"
+      },
+      {
+        "correctAnswer": {
+          "description": "Java 14",
+          "prefix": "C"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "Java 12",
+            "prefix": "A"
+          },
+          {
+            "description": "Java 11",
+            "prefix": "B"
+          },
+          {
+            "description": "Java Script",
+            "prefix": "D"
+          }
+        ],
+        "order": 4,
+        "title": "Which Java version introduced records ?"
+      },
+      {
+        "correctAnswer": {
+          "description": "It's removed from the service load balancer",
+          "prefix": "A"
+        },
+        "incorrectAnswers": [
+          {
+            "description": "Pod is restarted",
+            "prefix": "C"
+          },
+          {
+            "description": "Pod is deleted",
+            "prefix": "B"
+          },
+          {
+            "description": "It's probably a naked pod",
+            "prefix": "D"
+          }
+        ],
+        "order": 5,
+        "title": "What happen if a readiness probe fails on a pod ?"
+      }
+    ]
+  }

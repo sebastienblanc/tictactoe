@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Prices</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="overlay.css"
+</head>
+
+<body class="overlay-style">
+    <div class="container overlay-style">
+        <div class="row overlay-style" id="row-game">
+            <div class="card overlay-style">
+                <div class="card-body overlay-style overlay-question">
+                    <h5 class="card-title" id="question" data-question-id="0"></h5>
+                    <button type="button" class="btn btn-secondary" id="a0" data-answer-id="0"></button>
+                    <button type="button" class="btn btn-secondary" id="a1" data-answer-id="0"></button>
+                    <button type="button" class="btn btn-secondary" id="a2" data-answer-id="0"></button>
+                    <button type="button" class="btn btn-secondary" id="a3" data-answer-id="0"></button>
+                </div>
+            </div>
+            <div>
+                <div class="card-body overlay-style" id="countdown">
+                    <div class="values"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="row-score">
+            <h2>Final Score Board</h2>
+            <table class="table" id="score">
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="lib/easytimer.min.js"></script>
+
+<script>
+
+    function enableButtons() {
+        changeButtonMode(false)
+    }
+
+    function disableButtons() {
+        changeButtonMode(true)
+    }
+
+    function startCounter() {
+        var timer = new easytimer.Timer()
+        var timeoutInSeconds = parseInt(sessionStorage.getItem("timeout"))
+        console.log(timeoutInSeconds)
+        timer.start({countdown: true, startValues: {seconds: timeoutInSeconds}});
+        $('#countdown .values').html(timer.getTimeValues().toString());
+
+        timer.addEventListener('secondsUpdated', function (e) {
+            $('#countdown .values').html(timer.getTimeValues().toString());
+        });
+
+        timer.addEventListener('targetAchieved', function (e) {
+            $('#countdown .values').html('Time Off');
+        });
+    }
+
+    function changeButtonMode(disabled) {
+        $("#a0").prop('disabled', disabled);
+        $("#a1").prop('disabled', disabled);
+        $("#a2").prop('disabled', disabled);
+        $("#a3").prop('disabled', disabled);
+    }
+
+    function clickAnswer(buttonId) {
+        
+        $("#" + buttonId).removeClass("btn-secondary")
+        $("#" + buttonId).addClass("btn-primary")
+        disableButtons()
+
+        var contestId = sessionStorage.getItem("contestId")
+        var userId = sessionStorage.getItem("userId")
+        var questionId = document.getElementById("question").dataset.questionId
+
+        // If used with jquery approach the content is not refreshed correctly when read the dataset
+        var aId = document.getElementById(buttonId).dataset.answerId
+        sessionStorage.setItem("pushedButton", buttonId)
+
+        $.post({
+            url: "/user/question/answer/" + contestId + "/" + questionId + "/" + aId,
+            headers: {
+                "userId": userId
+            },
+            success: function(data, status) {
+                sessionStorage.setItem("correct", "true")
+            },
+            error: function(data, status) {
+                sessionStorage.setItem("correct", "false")
+            }
+        });
+    }
+
+    function resetColors(buttonId) {
+        $("#" + buttonId).removeClass("btn-secondary")
+        $("#" + buttonId).removeClass("btn-danger")
+        $("#" + buttonId).removeClass("btn-success")
+        $("#" + buttonId).removeClass("btn-primary")
+    }
+
+    function resetAnswerInformation() {
+        sessionStorage.removeItem("pushedButton")
+        sessionStorage.removeItem("correct")
+    }
+
+    function correctAnswer(buttonId) {
+        resetColors(buttonId)
+        $("#" + buttonId).addClass("btn-warning")
+    }
+
+    function incorrectAnswer(buttonId) {
+        resetColors(buttonId)
+        $("#" + buttonId).addClass("btn-danger")
+    }
+
+    function showUserResult() {
+        var buttonId = sessionStorage.getItem("pushedButton")
+        if (buttonId != null) {   
+            var isCorrect = sessionStorage.getItem("correct")
+            if (isCorrect == "true") {
+                correctAnswer(buttonId)
+            } else {
+                incorrectAnswer(buttonId)
+            }
+        }
+    }
+
+    function showScore(message) {
+        var listOfScores = message.scores
+
+        for(var i = 0; i < listOfScores.length; i++) {
+            var info = listOfScores[i];
+            $("#score").find('tbody')
+                .append($('<tr>')
+                    .append($('<th>')
+                            .attr("scope", "row")
+                            .text(i+1)
+                    )
+                    .append($('<td>')
+                            .text(info.username)
+                    )
+                    .append($('<td>')
+                            .text(info.score)
+                    )
+                )
+        }
+
+        $("#row-score").show()
+    }
+
+    function revealResult(message) {
+        var correctIndex = message.correctAnswerIndex
+        correctAnswer("a" + correctIndex)
+
+        var incorrectIndexes = message.incorrectAnswersIndex
+
+        for(var i = 0; i < incorrectIndexes.length; i++) {
+            var info = incorrectIndexes[i];
+            incorrectAnswer("a" + info)
+        }
+        
+    }
+
+    function showAnswers(message) {
+        resetAnswerInformation()
+        var question = document.getElementById("question")
+        question.innerHTML = message.questionTitle
+        question.dataset.questionId=message.questionId
+
+        var answers = message.answers;
+                
+        var a0 = document.getElementById("a0")
+        a0.innerHTML = answers[0].prefix + ') ' + answers[0].answerDescription
+        a0.dataset.answerId=answers[0].answerId
+        a0.className="btn btn-secondary"
+                
+        var a1 = document.getElementById("a1")
+        a1.innerHTML = answers[1].prefix + ') ' + answers[1].answerDescription
+        a1.dataset.answerId=answers[1].answerId
+        a1.className="btn btn-secondary"
+
+        var a2 = document.getElementById("a2")
+        a2.innerHTML = answers[2].prefix + ') ' + answers[2].answerDescription
+        a2.dataset.answerId=answers[2].answerId
+        a2.className="btn btn-secondary"
+
+        var a3 = document.getElementById("a3")
+        a3.innerHTML = answers[3].prefix + ') ' + answers[3].answerDescription
+        a3.dataset.answerId=answers[3].answerId
+        a3.className="btn btn-secondary"
+    }
+
+    $(document).ready(function() {
+        $("#row-game").hide()
+        $("#row-score").hide()
+
+        if (sessionStorage.getItem("username") == null) {
+            $.ajax({
+                dataType: 'json',
+                url: "/user/register", 
+                success: function(data, status) {
+                    $("#welcome").html("Welcome " + data.user)
+                    sessionStorage.setItem("username", data.user)
+                    sessionStorage.setItem("userId", data.userId)
+                    sessionStorage.setItem("contestId", data.contestId)
+                    sessionStorage.setItem("timeout", data.timeoutInSeconds)
+                }
+            });
+        } else {
+            // it is a reload of the page
+            sessionStorage.setItem("username", sessionStorage.getItem("username"))
+        }
+
+        disableButtons()
+
+        $("#a0").click(function() {
+            clickAnswer("a0")
+        })
+
+        $("#a1").click(function() {
+            clickAnswer("a1")
+        })
+
+        $("#a2").click(function() {
+            clickAnswer("a2")
+        })
+
+        $("#a3").click(function() {
+            clickAnswer("a3")
+        })
+
+    });
+
+
+    var source = new EventSource("/user/stream");
+    source.onmessage = function (event) {
+        // this might change when Quarkus supports the SSE types so we can fill on server side the type of event.
+        
+        
+        $("#row-game").show()
+        var incomingData = event.data
+        var sseContent = JSON.parse(incomingData)
+        switch (sseContent.type) {
+            
+            case "end": {
+                showScore(sseContent.content)
+                break;
+            }
+
+            case "reveal": {
+                revealResult(sseContent.content);
+                break;
+            }
+
+            case "question": {
+                enableButtons()
+                startCounter()
+                showAnswers(sseContent.content)
+                break;
+            }
+
+        }
+
+    };
+</script>
+
+</html>
